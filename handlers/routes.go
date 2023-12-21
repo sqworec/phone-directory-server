@@ -17,7 +17,7 @@ type HTTPHandler struct {
 }
 
 type ResponseID struct {
-	Id int `json:"id"`
+	ID int `json:"id"`
 }
 
 func NewHTTPHandler(db *data.DB) *HTTPHandler {
@@ -74,6 +74,39 @@ func (h *HTTPHandler) initRoutes() {
 
 		jsonResponse(w, id)
 	})
+
+	h.r.Delete("/employees/{id}", func(w http.ResponseWriter, r *http.Request) {
+		id := numberParam(r, "id")
+
+		fmt.Println(id)
+		err := h.db.Employee.DeleteEmployee(id)
+
+		if err != nil {
+			http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+			log.Printf("[ERROR] DeleteEmployee: %s", err)
+			return
+		}
+
+		response := ResponseID{
+			ID: id,
+		}
+
+		jsonResponse(w, response)
+	})
+
+	//h.r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
+	//	employee := data.Employee{}
+	//	parseFrom(w, r, &employee)
+	//
+	//	foundEmployees, err := h.db.Employee.SearchEmployee(&employee)
+	//	if err != nil {
+	//		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+	//		log.Printf("[ERROR] SearchEmployees: %s", err)
+	//		return
+	//	}
+	//
+	//	jsonResponse(w, foundEmployees)
+	//})
 }
 
 func (h *HTTPHandler) ServeHTTP(port int) {

@@ -1,6 +1,8 @@
 package data
 
-import "gorm.io/gorm"
+import (
+	"gorm.io/gorm"
+)
 
 type Employee struct {
 	ID                    int
@@ -42,3 +44,29 @@ func (er *employeesRepo) AddEmployee(emp *Employee) (int, error) {
 
 	return id, nil
 }
+
+func (er *employeesRepo) DeleteEmployee(id int) error {
+	err := er.db.First(&Employee{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	err = er.db.Delete(&Employee{}, id).Error
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+//func (er *employeesRepo) SearchEmployee(emp *Employee) ([]Employee, error) {
+//	employees := make([]Employee, 0)
+//
+//	query := er.db.Where(&emp)
+//	err := query.Find(&emp).Error
+//	if err != nil {
+//		return nil, err
+//	}
+//
+//	return employees, nil
+//}
