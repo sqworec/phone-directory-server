@@ -65,7 +65,7 @@ func (h *HTTPHandler) initRoutes() {
 		employee := data.Employee{}
 		parseFrom(w, r, &employee)
 
-		id, err := h.db.Employee.AddEmployee(&employee)
+		id, err := h.db.Employee.AddEmployee(employee)
 		if err != nil {
 			http.Error(w, "500 Internal server error", http.StatusInternalServerError)
 			log.Printf("[ERROR] AddEmployee: %s", err)
@@ -94,19 +94,26 @@ func (h *HTTPHandler) initRoutes() {
 		jsonResponse(w, response)
 	})
 
-	//h.r.Get("/search", func(w http.ResponseWriter, r *http.Request) {
-	//	employee := data.Employee{}
-	//	parseFrom(w, r, &employee)
-	//
-	//	foundEmployees, err := h.db.Employee.SearchEmployee(&employee)
-	//	if err != nil {
-	//		http.Error(w, "500 Internal server error", http.StatusInternalServerError)
-	//		log.Printf("[ERROR] SearchEmployees: %s", err)
-	//		return
-	//	}
-	//
-	//	jsonResponse(w, foundEmployees)
-	//})
+	h.r.Put("/employees/{id}", func(w http.ResponseWriter, r *http.Request) {
+		updEmployee := data.Employee{}
+
+		err := parseFrom(w, r, &updEmployee)
+
+		if err != nil {
+			http.Error(w, "400 Bad Request", http.StatusBadRequest)
+			return
+		}
+
+		id := numberParam(r, "id")
+
+		err = h.db.Employee.UpdateEmployee(id, updEmployee)
+		if err != nil {
+			http.Error(w, "500 Internal server error", http.StatusInternalServerError)
+			log.Printf("[ERROR] UpdateEmployee: %s", err)
+			return
+		}
+	})
+
 }
 
 func (h *HTTPHandler) ServeHTTP(port int) {

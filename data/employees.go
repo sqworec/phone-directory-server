@@ -1,6 +1,7 @@
 package data
 
 import (
+	"fmt"
 	"gorm.io/gorm"
 )
 
@@ -33,7 +34,7 @@ func (er *employeesRepo) Employee() ([]Employee, error) {
 	return employees, nil
 }
 
-func (er *employeesRepo) AddEmployee(emp *Employee) (int, error) {
+func (er *employeesRepo) AddEmployee(emp Employee) (int, error) {
 	//TODO: check data integrity
 
 	err := er.db.Create(&emp).Error
@@ -59,14 +60,21 @@ func (er *employeesRepo) DeleteEmployee(id int) error {
 	return nil
 }
 
-//func (er *employeesRepo) SearchEmployee(emp *Employee) ([]Employee, error) {
-//	employees := make([]Employee, 0)
-//
-//	query := er.db.Where(&emp)
-//	err := query.Find(&emp).Error
-//	if err != nil {
-//		return nil, err
-//	}
-//
-//	return employees, nil
-//}
+func (er *employeesRepo) UpdateEmployee(id int, updEmployee Employee) error {
+	employee := Employee{}
+	err := er.db.Find(&employee, id).Error
+	if err != nil {
+		return err
+	}
+
+	if employee.ID == 0 {
+		return fmt.Errorf("an employee with id %d is not found", id)
+	}
+
+	employee = updEmployee
+	employee.ID = id
+
+	err = er.db.Save(&employee).Error
+
+	return err
+}
